@@ -51,6 +51,8 @@ SELECT COUNT(CustomerID), Country FROM Customers GROUP BY Country ORDER BY COUNT
 *******The HAVING clause was added to SQL because the WHERE keyword could not be used with aggregate functions.
 ******* After GROUP BY WHERE is not permitted
 
+SELECT email FROM users WHERE sign_in_count = ANY (SELECT sign_in_count FROM users WHERE sign_in_count = 359);
+
 
 
 
