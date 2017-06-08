@@ -18,3 +18,5 @@ SELECT * from downloads WHERE title NOT LIKE 'c_%';
 
 
 select * from downloads where id between 80 and 90;   --Select between reng
+
+select * from downloads where id not between 80 and 90;
