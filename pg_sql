@@ -43,6 +43,10 @@ select a.CustomerName as [Customer Name], a.City as [Customer City] from Custome
 
 ****GROUP BY use with aggregation function
 
+The following SQL statement lists the number of customers in each country, sorted high to low:
+
+SELECT COUNT(CustomerID), Country FROM Customers GROUP BY Country ORDER BY COUNT(CustomerID) DESC;
+
 
 
 
