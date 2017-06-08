@@ -30,3 +30,5 @@ SELECT * FROM Products WHERE ProductName BETWEEN 'Carnarvon Tigers' AND 'Mozzare
 select id as "User ID", title as "Name" from downloads;
 
 select a.id,a.title,b.id,b.coupon_code from downloads as a, coupons as b ;
+
+select a.id,a.title,b.id,b.coupon_code from downloads as a, coupons as b where b.id = 3;
