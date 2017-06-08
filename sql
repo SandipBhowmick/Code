@@ -20,3 +20,6 @@ SELECT * from downloads WHERE title NOT LIKE 'c_%';
 select * from downloads where id between 80 and 90;   --Select between reng
 
 select * from downloads where id not between 80 and 90;
+
+SELECT * FROM Products WHERE (Price BETWEEN 10 AND 20) AND NOT CategoryID IN (1,2,3);
+
