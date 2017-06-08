@@ -32,3 +32,10 @@ select id as "User ID", title as "Name" from downloads;
 select a.id,a.title,b.id,b.coupon_code from downloads as a, coupons as b ;
 
 select a.id,a.title,b.id,b.coupon_code from downloads as a, coupons as b where b.id = 3;
+
+select downloads.title,users.email from downloads INNER JOIN users on downloads.user_id = users.id;
+
+select downloads.title,users.email from downloads INNER JOIN users on downloads.user_id = users.id order by downloads.title desc;
+
+Self Join
+select a.CustomerName as [Customer Name], a.City as [Customer City] from Customers a, Customers b where a.CustomerID<>b.CustomerID and a.City= b.City order by a.City;
