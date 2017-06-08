@@ -53,6 +53,6 @@ SELECT COUNT(CustomerID), Country FROM Customers GROUP BY Country ORDER BY COUNT
 
 SELECT email FROM users WHERE sign_in_count = ANY (SELECT sign_in_count FROM users WHERE sign_in_count = 359);
 
-
-
+Create table from another table:
+CREATE TABLE new_table_name AS  SELECT column1, column2,... FROM existing_table_name  WHERE ....;
 
