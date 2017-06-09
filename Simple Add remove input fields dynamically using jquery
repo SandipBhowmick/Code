@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+	var i=1;	
+	var arr= new Array();
+	var rarr= new Array();
+	var ii;
+	var f=0;
+	var l;
+    $('body').on('click','#add',function(){
+
+    	if(rarr.length>0)
+    	{
+    		//alert("true");
+			rarr=rarr.sort();
+			rarr=rarr.reverse();
+			ii=rarr.pop();
+			var newTextBoxDiv = $(document.createElement('div')).attr("id", 'TextBoxDiv' + ii);
+	    	newTextBoxDiv.after().html('<label>Textbox'+ ii + ' : </label>' +'<input type="text" name="textbox' + ii +'" id="textbox' + ii + '" value="" >'+ '<button type="button" id="'+ii+'">Delete</button>');
+			newTextBoxDiv.appendTo("#main");
+			arr.push(ii);
+			f=1;
+
+		}
+		else
+		{
+			if(f==1)			
+			{	
+				arr.sort;
+				l=arr.length;				
+				i= l-1;
+				f=0;
+			}
+	    	var newTextBoxDiv = $(document.createElement('div')).attr("id", 'TextBoxDiv' + i);
+	    	newTextBoxDiv.after().html('<label>Textbox'+ i + ' : </label>' +'<input type="text" name="textbox' + i +'" id="textbox' + i + '" value="" >'+ '<button type="button" id="'+i+'">Delete</button>');
+			newTextBoxDiv.appendTo("#main");
+			arr.push(i);
+			i++;
+		}
+    });
+
+    $('#main').on('click','button',function(){
+    	var id= $(this).attr("id");
+    	if (id !='add')
+    		{   
+    		 	rarr.push(id);	
+    			i--;
+    			$('#TextBoxDiv' + id).remove();
+    		}
+    });
+});
+</script>
+</head>
+<body>
+<div id="main">
+
+<button id="add">Add</button>
+</div>
+
+</body>
+</html>
