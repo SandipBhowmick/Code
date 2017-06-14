@@ -1,0 +1,21 @@
+$.ajax({
+              type: "post",
+              url: "<%= check_mark_spam_news_path %>" ,
+              data:{id: "<%= @news_data.id %>"},   ###@news_data.id this is for sending value, mast be 
+                                                        in controller action like show and id: is the sym for 
+                                                        params
+              success: function(data){
+                 // alert(data.res);
+                  if(data.res == 1)
+                  {
+                      $('.mark_spam').addClass('hidden');
+                      $('.unmark_spam').removeClass('hidden');        
+
+                  }else{
+
+                      $('.mark_spam').removeClass('hidden');
+                      $('.unmark_spam').addClass('hidden');
+
+                  }
+              }
+        });
