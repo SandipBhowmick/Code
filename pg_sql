@@ -56,3 +56,15 @@ SELECT email FROM users WHERE sign_in_count = ANY (SELECT sign_in_count FROM use
 Create table from another table:
 CREATE TABLE new_table_name AS  SELECT column1, column2,... FROM existing_table_name  WHERE ....;
 
+<------------Finding Duplicates------------------------->
+select ename,empno, count(*) c from emp group by ename having c>1 and ename like 'a%';
+
+
+<------------Find N th max sal ------------------------->
+select distinct(sal) from emp order by sal desc limit n-1,1;
+
+
+
+
+
+
