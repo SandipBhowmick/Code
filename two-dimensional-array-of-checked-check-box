@@ -1,0 +1,29 @@
+#2d check box
+
+<% #abort(@package.to_json)
+    if @package.present?
+        @package.each_with_index do | value, index|
+           is_checked  = ""
+        if @job[:package_id].present? && !@job[:package_id].nil?   
+               is_exist_in_array  =  @job[:package_id].include? value.id.to_s
+                if is_exist_in_array == true
+                    is_checked = "checked = checked"                             
+                end    
+        end    
+
+                     
+
+
+%>
+
+
+<label class="postJobUpgrade">
+	<div><input name="job[package_id][]" id="upsell_ids_" value="<%= value.id %>" data-js="postJobUpgrade" type="checkbox"  <%= is_checked %>></div>
+        <div class="postJobUpgrade-intro">
+			<h5 class="u-mt--xsmall"><%= value.title %></h5>
+                          <%= value.description %>
+        </div>
+    <div class="postJobUpgrade-price">$<%= value.amount %></div>
+</label>
+
+<%      end    end         %>
