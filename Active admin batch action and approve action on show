@@ -1,0 +1,34 @@
+	member_action :job_approve, method: :put do		
+		job = Job.find(params[:id])
+		job.update(is_approved: true)
+		redirect_to admin_jobs_path
+	end
+  	
+	member_action :job_disapprove, method: :put do
+		job = Job.find(params[:id])
+		job.update(is_approved: false)
+		redirect_to admin_jobs_path
+	end
+
+	batch_action :approve do |ids|
+	    batch_action_collection.find(ids).each do |job|
+	      job.update(is_approved: true)
+	    end
+    redirect_to collection_path, alert: "The jobs have been approved."
+  	end
+
+  	batch_action :disapprove do |ids|
+	    batch_action_collection.find(ids).each do |job|
+	      job.update(is_approved: false)
+	    end
+    redirect_to collection_path, alert: "The jobs have been disapproved."
+  	end
+  	
+
+  	 action_item :job_disapprove, only: :show do 
+  	 	link_to "Disapprove", job_disapprove_admin_job_path(job), method: :put if job.is_approved == true
+	end
+
+	action_item :job_approve, only: :show do 
+  	 	link_to "Approve",  job_approve_admin_job_path(job), method: :put if job.is_approved == false
+  	 end
