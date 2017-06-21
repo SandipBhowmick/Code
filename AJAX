@@ -19,3 +19,24 @@ $.ajax({
                   }
               }
         });
+
+
+
+$('#follow_button, #unfollow_button').on('click',function(){
+        $.ajax({
+            type: "post",
+            url: "<%= download_follow_artist_path %>" ,
+            data: {'download_id': '<%= @download_data.id %>','artist_id': '<%= @download_data.user_id %>'},
+            success: function(data){
+              //alert(data.res)
+                if(data.res == 1) {
+                  $('#follow_button').addClass('hidden');
+                  $('#unfollow_button').removeClass('hidden');
+                }else if(data.res == 0){
+                  $('#follow_button').removeClass('hidden');
+                  $('#unfollow_button').addClass('hidden');
+                }else{
+                  
+                }
+            }
+        });
