@@ -1,3 +1,7 @@
+Data from another website
+https://codepen.io/anon/pen/RGOqQY
+---------------------------------------------------
+Data from local
 $.ajax({
               type: "post",
               url: "<%= check_mark_spam_news_path %>" ,
