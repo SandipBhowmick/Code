@@ -18,6 +18,26 @@ $(document).ready(function(){
 
 </script>
 
+*****controller section
+
+ def add_collection      
+      download_id       = params[:download_id].present? ?  params[:download_id] : 0
+      collectionrec_id  = params[:collection_id].present? ?  params[:collection_id] : 0 
+      
+      if(download_id != 0 && collectionrec_id != 0)
+          findCollectionDetails=CollectionDetail.where("download_id = ? and collection_id = ?", download_id,collectionrec_id).first
+          
+          if(findCollectionDetails)
+          result = {'res' => 0, 'message' => 'already added to this book marks.'}
+
+          else
+            CollectionDetail.create(download_id: download_id, collection_id: collectionrec_id)
+           result = {'res' => 1, 'message' => 'added to collection.'}
+         end
+      end
+      render json: result, status: 200
+    end
+
 =======================================================================
 
 Exmp-1
