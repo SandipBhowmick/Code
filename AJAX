@@ -1,4 +1,25 @@
 
+<script type="text/javascript">
+$(document).ready(function(){
+  $(".collection").on('click',function() {
+    var id = $(this).attr("id");     
+    $.ajax({          
+            type: "post",
+            url: "<%= add_collection_detail_path %>",
+            data: {'collection_id': id,'download_id': '<%= @download_data.id %>'},
+            success: function(r){ 
+               if(r.res == 1) {
+                  $("#"+id).html("Added");                
+                 }              
+            } 
+        });
+    });
+  });
+
+</script>
+
+=======================================================================
+
 Exmp-1
 Data from another website
 https://codepen.io/anon/pen/RGOqQY
