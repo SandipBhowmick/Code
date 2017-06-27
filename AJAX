@@ -1,4 +1,4 @@
-
+"priti.kabra@brsoftech.org" <priti.kabra@brsoftech.org>; 
 <script type="text/javascript">
 $(document).ready(function(){
   $(".collection").on('click',function() {
