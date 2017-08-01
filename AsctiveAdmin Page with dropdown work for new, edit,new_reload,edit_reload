@@ -1,0 +1,79 @@
+  controller do
+    def set_state        
+      @venvor_to_find = Vendor.find(params[:id])       
+      @@states = State.where(:country_id => @venvor_to_find.country_id)
+      @@cities = City.where(:state_id => @venvor_to_find.state_id)          
+    end
+  end
+
+  form  multiplart: true do |f|
+    f.inputs "Vendor Details" do
+      f.input :hotel_name
+      f.input :full_name
+      f.input :email
+      f.input :mobile_number
+      f.input :company_name
+      f.input :pan_number
+      f.inputs  "Address Details" do
+        f.input :address        
+        f.input :country_id, :input_html => { :id => "country_id" },as: :select,collection: Country.all.pluck(:name, :id), include_blank: 'Select country'         
+        if f.object.new_record?
+          f.input :state_id,:input_html => { :id => "state_id" }, as: :select,collection: State.where(:id =>f.object.state_id).pluck(:name, :id), include_blank: 'Select state'
+        else
+          f.input :state_id, :input_html => { :id => "state_id" }, as: :select,collection: @@states.collect{|p| [ p.name, p.id ] }, include_blank: 'Select state'
+        end 
+        if f.object.new_record?
+          f.input :city_id,:input_html => { :id => "city_id" }, as: :select,collection: City.where(:id =>f.object.city_id).pluck(:name, :id), include_blank: 'Select city'
+        else
+          f.input :city_id, :input_html => { :id => "city_id" }, as: :select,collection: @@cities.collect{|p| [ p.name, p.id ] }, include_blank: 'Select city'
+        end       
+      end
+
+      f.input :password
+      f.input :password_confirmation
+      f.input :status, as: :select, collection: Vendor.all_status, include_blank: false
+      f.inputs "Profile Image" do
+        f.input :profile_image, as: :file
+      end
+
+      f.inputs "Hotel Images" do
+        f.has_many :images, allow_destroy: true do |image|
+          image.input :name, label: 'Image', as: :file, hint: image.object.name.url
+          image.input :caption
+        end
+      end
+    end
+    f.actions
+  end
+****************************************Add this js to active_admin.js*******************************************
+
+$(document).ready(function() {
+	$("select#country_id").change(function(e){
+		data_for_state($("#country_id").val());		
+	})
+	$("select#state_id").change(function(b){
+		data_for_city($("#state_id").val());		
+	})
+	
+	function data_for_state(e){		
+		$.getJSON("/admin/cities/get_states",{country_id: e, ajax: 'true'}, function(response){
+			var options = '';
+			for (var i = 0; i < response.length; i++) {
+				options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+			}
+			$("select#state_id").html('<option value="">Select state</option>'+options);
+
+		})
+	}
+
+	function data_for_city(b){		
+		$.getJSON("/admin/cities/get_cities",{state_id: b, ajax: 'true'}, function(response){
+			var options = '';
+			for (var i = 0; i < response.length; i++) {
+				options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+			}
+			$("select#city_id").html('<option value="">Select city</option>'+options);
+
+		})
+	}
+});
