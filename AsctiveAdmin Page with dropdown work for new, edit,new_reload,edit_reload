@@ -1,3 +1,5 @@
+before_action :set_state, only: [:edit]
+
   controller do
     def set_state        
       @venvor_to_find = Vendor.find(params[:id])       
@@ -15,18 +17,22 @@
       f.input :company_name
       f.input :pan_number
       f.inputs  "Address Details" do
-        f.input :address        
-        f.input :country_id, :input_html => { :id => "country_id" },as: :select,collection: Country.all.pluck(:name, :id), include_blank: 'Select country'         
-        if f.object.new_record?
+        f.input :address 
+        # if f.object.new_record?       
+        f.input :country_id, :input_html => { :id => "country_id" },as: :select,collection: Country.all.pluck(:name, :id), include_blank: 'Select country'
+        # else
+        # f.input :country_id, :input_html => { :id => "country_id" },as: :select,collection: Country.where(:id =>f.object.country_id).pluck(:name, :id), include_blank: 'Select country'         
+        # end 
+         if f.object.new_record?
           f.input :state_id,:input_html => { :id => "state_id" }, as: :select,collection: State.where(:id =>f.object.state_id).pluck(:name, :id), include_blank: 'Select state'
-        else
-          f.input :state_id, :input_html => { :id => "state_id" }, as: :select,collection: @@states.collect{|p| [ p.name, p.id ] }, include_blank: 'Select state'
-        end 
-        if f.object.new_record?
+         else
+           f.input :state_id, :input_html => { :id => "state_id" }, as: :select,collection: @@states.collect{|p| [ p.name, p.id ] }, include_blank: 'Select state'
+         end 
+         if f.object.new_record?
           f.input :city_id,:input_html => { :id => "city_id" }, as: :select,collection: City.where(:id =>f.object.city_id).pluck(:name, :id), include_blank: 'Select city'
-        else
-          f.input :city_id, :input_html => { :id => "city_id" }, as: :select,collection: @@cities.collect{|p| [ p.name, p.id ] }, include_blank: 'Select city'
-        end       
+         else
+           f.input :city_id, :input_html => { :id => "city_id" }, as: :select,collection: @@cities.collect{|p| [ p.name, p.id ] }, include_blank: 'Select city'
+         end       
       end
 
       f.input :password
@@ -46,10 +52,25 @@
     f.actions
   end
 ****************************************Add this js to active_admin.js*******************************************
-
 $(document).ready(function() {
+	// if(!!$("#country_id").val())
+	// {
+	// 	data_for_state($("#country_id").val());
+	// }
+
+	// if(!!$("#state_id").val())
+	// {
+	// 	data_for_city($("#state_id").val());
+	// }
+	// alert(!!$("#country_id").val());
+
+
 	$("select#country_id").change(function(e){
-		data_for_state($("#country_id").val());		
+		data_for_state($("#country_id").val());
+		$("select#city_id").empty();
+		var option = $("<option />");
+		option.attr("value", '0').text('Select city');
+		$("select#city_id").append(option);		
 	})
 	$("select#state_id").change(function(b){
 		data_for_city($("#state_id").val());		
