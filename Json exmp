@@ -52,9 +52,6 @@ $.ajax({
 }
 
 
-
-
-
 ********************* now access ***************************
 $.each(r.res, function(key, value){
 		$("#user_state_id").append("<option value='" + value.id + "'>" + value.state_name +"</option>");
