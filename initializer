@@ -1,0 +1,12 @@
+
+require 'yaml'
+code_currency = {}
+code_currency = YAML.load_file('config/locales/client.en.yml')['en']['js']['banks']
+banks = YAML.load_file('config/banks.yml')
+banks.each do |t|
+  t["name"] = code_currency[t['code']]
+  unless Bank.where(:name => t["name"], :code => t["code"]).present?
+    Bank.create(t)
+   end
+end
+File.open('config/banks1.yml', 'w') { |f| YAML.dump(banks, f) }
