@@ -1,3 +1,4 @@
+# initializer a table with the help of two yml file 
 
 require 'yaml'
 code_currency = {}
