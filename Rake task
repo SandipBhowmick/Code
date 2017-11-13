@@ -9,3 +9,4 @@ task :seed_bank  => :environment do
   end
 end
 
+# bundle exec rake seed_bank
