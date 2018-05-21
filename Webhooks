@@ -1,0 +1,157 @@
+class WebhooksController < ApplicationController
+    before_action :auth_anybody!
+    skip_before_filter :verify_authenticity_token
+    def tx
+        if params[:type] == "transaction" && params[:hash].present?
+            AMQPQueue.enqueue(:deposit_coin, txid: params[:hash], channel_key: "satoshi")
+            render :json => { :status => "queued" }
+        end
+    end
+    def eth
+        if params[:type] == "transaction" && params[:hash].present?
+            AMQPQueue.enqueue(:deposit_coin, txid: params[:hash], channel_key: "ether")
+            render :json => { :status => "queued" }
+        end
+    end
+    # def paypal 
+    #   Rails.logger.info("---------------hook is received-------------------")
+    #   params.permit!  
+    #   status = params[:payment_status]
+    #   user_id = params['invoice'].split('_')[1]
+    #   order_id = params['invoice'].split('_')[2]
+        
+    #   if status == 'Completed'
+    #       Rails.logger.info("---------------completed is received-------------------")
+    #       order = ::PlanOrder.find_by_id(order_id)
+    #       Rails.logger.info("---------------#{order}-------------------")
+    #       Rails.logger.info("---------------#{params[:mc_gross]}-------------------")
+    #       # ActiveRecord::Base.transaction do
+    #       #   deposit.submit!
+    #       #   deposit.accept!
+    #       # end       
+          
+    #      order.order_status = ::PlanOrder::DONE
+    #      order.order_items.each do |item|
+    #       plan = Plan.find(item.plan_id)
+    #       UserPlan.create(member_id: item.member_id, plan_id: item.plan_id, plan_expiry: plan.get_expiry_date, user_payout_type: item.user_option) 
+    #      end  
+    #   end
+    #   render nothing: true
+    # end
+
+    def coin_payment 
+      Rails.logger.info("---------------coin payment hook is received-------------------")
+      Rails.logger.info("---------------#{params.to_json}-------------------")
+      params.permit!  
+      status = params[:status]
+      tx_id = params[:txn_id]
+      received_amount = params[:received_amount]
+      amount = params[:amount2]
+      received_confirms = params[:received_confirms]
+      order = PlanOrder.find_by(transaction_id: tx_id)
+      Rails.logger.info("---------------#{order}-------------------")
+      Rails.logger.info("---------------#{received_confirms}-------------------")
+      if order.present?
+        if status == '100' && received_amount == amount 
+          Rails.logger.info("---------------payment is completed-------------------")
+          order.order_status = PlanOrder::DONE 
+          order.transaction_data = Time.now.strftime("%d/%m/%Y %H:%M")
+          order.payment_gateway = "Coinpayments"
+          Rails.logger.info("---------------Order set #{order}-------------------")
+          ActiveRecord::Base.transaction do
+                # order.plan_order_items.each do |item|
+                #     item.update(order_status: PlanOrderItem::DONE)
+                #     UserPlan.create(member_id: item.member_id, plan_id: item.plan_id, plan_expiry: plan.get_expiry_date, user_payout_type: item.user_option, quantity: item.quantity) 
+                # end
+            plan = Plan.find(order.plan_id)
+            Rails.logger.info("---------------Plan #{plan}-------------------")
+            Rails.logger.info("--------------- #{plan.get_expiry_date}-------------------")
+            UserPlan.create(member_id: order.member_id, plan_id: order.plan_id, plan_expiry: plan.get_expiry_date, hash_type: order.hash_type, status: 1, price: order.total_amount, quantity: order.unit ) 
+
+            if order.save
+                Rails.logger.info("---------------order is saved -------------------")
+                get_member_detail = Member.where('id = ?', order.member_id).first   
+                save_free_token_slab order.total_amount, get_member_detail
+                total_level_plan = LevelPlan.all.order("level ASC")
+                count_val = 0
+                if get_member_detail.used_referral_code.present?
+                  tamount = order.total_amount
+                    get_parent_member_paid get_member_detail.used_referral_code, total_level_plan, tamount, count_val
+                 end     
+            else
+                Rails.logger.info("---------------#{order.errors.messages.join('.')} -------------------")
+            end
+          end
+        end
+      else 
+          Rails.logger.info("---------------order not found -------------------")
+      end
+      render nothing: true
+    end
+
+	def get_parent_member_paid ref_code, total_level_plan, amount, count_val
+		 Rails.logger.info '***********************************'
+		 @get_parent_user = Member.where('referral_code = ?', ref_code).first
+		 total_level = total_level_plan.length - count_val
+		 if @get_parent_user.present?
+			 	percentage = total_level_plan[5 - total_level].percentage
+				quantity = amount * percentage/100 
+				Rails.logger.info '@@@@@@@@@@@@Quantity@@@@@@@@@@@@@@'
+				Rails.logger.info amount
+				Rails.logger.info percentage
+				Rails.logger.info quantity
+
+				from_currency = Currency.find(1).code	
+				@currency_data = @get_parent_user.get_account(from_currency)
+
+				account_detail = Account.where('member_id = ? && currency=?', @get_parent_user.id, 1).first
+				if account_detail.present?
+				 	updated_quantity_value = quantity + account_detail.balance
+				 	Rails.logger.info '@@@@@@@@@@@@Updated Balance@@@@@@@@@@@@@2'
+				  Rails.logger.info quantity
+				  Rails.logger.info account_detail.balance
+				  Rails.logger.info updated_quantity_value
+					balance = updated_quantity_value.to_f				 	
+					@currency_data.plus_funds balance, reason: Account::PLAN_REFERRAL_BONUS, ref: account_detail
+				end
+				if @get_parent_user.used_referral_code.present?
+				  	total_level = total_level - 1
+				  	if total_level != 0
+				  		count_val = count_val + 1
+				  		Rails.logger.info '***********************************'
+				  		Rails.logger.info count_val
+				  		get_parent_member_paid @get_parent_user.used_referral_code, total_level_plan, amount, count_val
+				  	end	
+				end
+			end	
+	end
+
+
+	def save_free_token_slab total_amount, member_detail
+		from_currency = Currency.find(11).code	
+		@currency_data = member_detail.get_account(from_currency)
+		account_detail = Account.where('member_id = ? && currency=?', member_detail.id, 11).first
+		if account_detail.present?
+			percentage = get_free_slab_percent total_amount
+			quantity = total_amount * percentage/100
+		 	updated_quantity_value = quantity + account_detail.balance
+			balance = updated_quantity_value.to_f		
+			Rails.logger.info '*************** BALANCE UPDATED********************'
+			Rails.logger.info percentage		 	
+			Rails.logger.info total_amount		 	
+			Rails.logger.info quantity		 	
+			Rails.logger.info account_detail.balance		 	
+			Rails.logger.info balance
+		 	@currency_data.plus_funds balance, reason: Account::ERC_TOKEN_BONUS, ref: account_detail
+		end		
+	end	
+
+	def get_free_slab_percent total_amount
+			slab_data = FreeTokenSlab.where('(min_value <= ? && max_value >= ?) OR (min_value <= ? && max_value IS NULL)', total_amount, total_amount, total_amount).first
+			if slab_data.present?
+				return (slab_data.token_percentage).to_f
+			else
+				return 0
+			end	
+	end	
+end
